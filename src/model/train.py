@@ -7,6 +7,7 @@ from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
 import numpy as np
 from sklearn.cluster import KMeans
+import json
 
 url = "https://www.google.com/search?q={}&start={}&hl=en"  # hl = languages, cr = country
 
@@ -94,6 +95,7 @@ def get_clusters(word_to_vec, k=5, max_iteration=300):
 class ModelTrainer():
     def __init__(self, keywords, id):
         self.id = str(id)
+        self.json_path = "model/data/"+self.id+".json"
         self.keywords = keywords
         self.get_clusters()
 
@@ -104,4 +106,7 @@ class ModelTrainer():
         model = train(word_to_doc, self.id, vec_size)
         word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
-        print(result)
+        with open(self.json_path, "w+") as f:
+            f.write(json.dumps(result))
+            f.close()
+        print(self.json_path + " written")
