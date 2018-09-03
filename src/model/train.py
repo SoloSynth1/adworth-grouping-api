@@ -17,28 +17,6 @@ def geturls(keyword, pages):
         urls.append(url.format(keyword.replace(" ", "%20"), str(x * result_per_page)))
     return urls
 
-def get_ads(response):
-    regex = re.compile('.*ads-creative.*')
-    ads = []
-    soup = BeautifulSoup(response.text, 'lxml')
-    candidates = soup.find_all('li', class_="ads-ad")
-    for candidate in candidates:
-        print(candidate)
-        try:
-            ads.append((candidate.find('h3').text, candidate.find('div', regex).text))
-        except:
-            continue
-    return ads
-
-def ads_from_keyword(keyword):
-    pages = 5
-    urls = geturls(keyword, pages)
-    ads = []
-    for url in urls:
-        response = requests.get(url)
-        ads += get_ads(response)
-    return ads
-
 def preprocess(soup):
     raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
     output = raw_doc
@@ -47,19 +25,8 @@ def preprocess(soup):
     output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
     return output
 
-def get_word_to_doc(keywords):
-    links = []
-    for keyword in keywords:
-        links.extend(geturls(keyword, 1))
-    word_to_doc = {}
-    for i, _ in enumerate(links):
-        soup = BeautifulSoup(requests.get(links[i]).content, 'lxml')
-        word_to_doc[keywords[i]] = preprocess(soup)
-    return word_to_doc
-
 def get_word_to_doc_threaded(keywords, threads=50):
     links = []
-
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
 
@@ -105,7 +72,7 @@ def train(word_to_doc, model_id, vec_size=30, max_epochs=100, alpha=0.025):
     # print("Model Saved")
     return model
 
-def get_word_to_vec(model, word_to_doc, vec_size):
+def get_word_to_vec(model, word_to_doc):
     word_to_vec = {}
     for key in word_to_doc.keys():
         word_to_vec[key] = model.docvecs[key]
@@ -135,6 +102,6 @@ class ModelTrainer():
         while len(word_to_doc) != len(self.keywords):
             time.sleep(1)
         model = train(word_to_doc, self.id, vec_size)
-        word_to_vec = get_word_to_vec(model, word_to_doc, vec_size)
+        word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
         print(result)

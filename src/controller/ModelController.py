@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from controller.Responses import response
 from model.train import ModelTrainer
 import time
+from threading import Thread
 
 modelController = Blueprint("modelController", __name__)
 
@@ -19,7 +20,8 @@ def create_model():
     request_dict = request.json
     if 'data' in request_dict.keys() and type(request_dict['data']) == type([]):
         id = int(time.time())
-        mt = ModelTrainer(request_dict['data'], str(id))
+        t = Thread(target=ModelTrainer, args=(request_dict['data'], str(id)))
+        t.start()
         payload = {}
         payload['id'] = id
         return response("Model Request Created Successfully", payload)
