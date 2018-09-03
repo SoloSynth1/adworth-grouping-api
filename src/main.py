@@ -1,7 +1,7 @@
 from flask import Flask
-from Controller.ExceptionHandler import JSONExceptionHandler
-from Controller.ModelController import modelController
-from Controller.Responses import response
+from controller.ExceptionHandler import JSONExceptionHandler
+from controller.ModelController import modelController
+from controller.Responses import response
 
 app = Flask(__name__)
 handler = JSONExceptionHandler(app)

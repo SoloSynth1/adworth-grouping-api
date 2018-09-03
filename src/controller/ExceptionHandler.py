@@ -8,7 +8,10 @@ class JSONExceptionHandler(object):
             self.init_app(app)
 
     def std_handler(self, error):
-        response = jsonify(message=error.description)
+        try:
+            response = jsonify(message=error.description)
+        except:
+            response = jsonify(message="Internal Server Error")
         response.status_code = error.code if isinstance(error, HTTPException) else 500
         return response
 
