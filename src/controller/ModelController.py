@@ -5,6 +5,7 @@ from model.Trainer import ModelTrainer
 import time
 from threading import Thread
 import json
+import os
 
 modelController = Blueprint("modelController", __name__)
 
@@ -12,12 +13,13 @@ modelController = Blueprint("modelController", __name__)
 @modelController.route("/model/<int:mid>", methods=['GET'])
 def report_model_status(mid):
     try:
-        with open('model/model_list.csv', 'r') as f:
+        abspath = os.path.dirname(os.path.abspath(__file__))
+        with open(abspath+'/model_list.csv', 'r') as f:
             model_list = [int(x) for x in f.readlines()]
             f.close()
         if mid in model_list:
             try:
-                with open('model/clusters/{}.json'.format(str(mid)), 'r') as f:
+                with open(abspath+'/clusters/{}.json'.format(str(mid)), 'r') as f:
                     clusters = json.loads(f.read())
                     f.close()
                 payload = {'clusters': clusters,
