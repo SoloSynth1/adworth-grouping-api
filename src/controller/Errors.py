@@ -8,7 +8,7 @@ class ModelNotFound(NotFound):
 class ModelInTraining(NotFound):
     def __init__(self, mid):
         super(ModelInTraining, self).__init__()
-        self.description = "Result of model ID#{} is in training and is not yet available.".format(mid)
+        self.description = "Result of model #{} is in training and is not yet available.".format(mid)
 
 class MalformedRequestData(BadRequest):
     def __init__(self):
