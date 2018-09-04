@@ -54,7 +54,6 @@ def get_word_to_doc_threaded(keywords, threads=20):
                         t[j].start()
                 while len(word_to_doc) != work_count:
                     time.sleep(1)
-                print(word_to_doc)
                 for k, v in word_to_doc.items():
                     if v == None:
                         raise e
@@ -72,8 +71,9 @@ def get_word_to_doc_threaded(keywords, threads=20):
 
 
 def thread_worker(link, keyword, word_to_doc):
-    soup = BeautifulSoup(requests.get(link).content, 'lxml')
-    word_to_doc[keyword] = preprocess(soup)
+    if not keyword in word_to_doc.keys() or word_to_doc[keyword] != None:
+        soup = BeautifulSoup(requests.get(link).content, 'lxml')
+        word_to_doc[keyword] = preprocess(soup)
 
 
 def train(word_to_doc, model_id, vec_size=30, max_epochs=100, alpha=0.025):
