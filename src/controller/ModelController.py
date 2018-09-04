@@ -19,7 +19,7 @@ def report_model_status(mid):
             f.close()
         if mid in model_list:
             try:
-                with open(parent_dir+'/../model/clusters/{}.json'.format(str(mid)), 'r') as f:
+                with open(parent_dir+'/model/clusters/{}.json'.format(str(mid)), 'r') as f:
                     clusters = json.loads(f.read())
                     f.close()
                 payload = {'clusters': clusters,
