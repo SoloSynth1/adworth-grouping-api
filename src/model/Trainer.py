@@ -22,12 +22,15 @@ def geturls(keyword, pages):
 
 
 def preprocess(soup):
-    raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
-    output = raw_doc
-    output = re.compile('(\n|\t|\r|\xa0)').sub(' ', output)
-    output = re.compile("\'").sub("'", output)
-    output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
-    return output
+    try:
+        raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
+        output = raw_doc
+        output = re.compile('(\n|\t|\r|\xa0)').sub(' ', output)
+        output = re.compile("\'").sub("'", output)
+        output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
+        return output
+    except:
+        return None
 
 
 def get_word_to_doc_threaded(keywords, threads=20):
@@ -38,6 +41,7 @@ def get_word_to_doc_threaded(keywords, threads=20):
     word_to_doc = {}
     length = len(links)
     i = 0
+    t = [None for _ in range(threads)]
     while i < length:
         fetched = False
         while not fetched:
@@ -46,17 +50,23 @@ def get_word_to_doc_threaded(keywords, threads=20):
                 print("{}/{}...".format(work_count, length))
                 for j in range(threads):
                     if i + j < length:
-                        t = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
-                        t.start()
-
+                        t[j] = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
+                        t[j].start()
                 while len(word_to_doc) != work_count:
                     time.sleep(1)
+                print(word_to_doc)
+                for k, v in word_to_doc.items():
+                    if v == None:
+                        raise e
                 fetched = True
-            except:
+            except Exception as e:
                 # wait for google search to unblock
-                print("got blocked. lul")
-                time.sleep(600)
-        t.join()
+                fetched = False
+                print("got blocked. lul\nwaiting 30 mins...")
+                time.sleep(1800)
+                continue
+        for thread in t:
+            thread.join()
         i += threads
     return word_to_doc
 
@@ -128,7 +138,7 @@ class ModelTrainer:
         self.get_clusters()
 
     def get_clusters(self, vec_size=30):
-        word_to_doc = get_word_to_doc_threaded(self.keywords, threads=50)
+        word_to_doc = get_word_to_doc_threaded(self.keywords, threads=100)
         while len(word_to_doc) != len(self.keywords):
             time.sleep(1)
         model = train(word_to_doc, self.mid, vec_size)
