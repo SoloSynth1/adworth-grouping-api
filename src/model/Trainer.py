@@ -120,8 +120,9 @@ def check_dir(directory):
 
 class ModelTrainer:
     def __init__(self, keywords, mid):
+        self.abspath = os.path.dirname(os.path.abspath(__file__))
         self.mid = str(mid)
-        self.json_path = 'model/clusters/{}.json'.format(self.mid)
+        self.json_path = self.abspath+ '/clusters/{}.json'.format(self.mid)
         self.keywords = keywords
         self.record_id()
         self.get_clusters()
@@ -133,13 +134,13 @@ class ModelTrainer:
         model = train(word_to_doc, self.mid, vec_size)
         word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
-        check_dir('model/clusters/')
+        check_dir(self.abspath+'/clusters/')
         with open(self.json_path, "w") as f:
             f.write(json.dumps(result))
             f.close()
         print(self.json_path + " written")
 
     def record_id(self):
-        with open('model/model_list.csv', 'a') as f:
+        with open(self.abspath+'/model_list.csv', 'a') as f:
             f.writelines(self.mid+'\n')
             f.close()
