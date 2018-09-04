@@ -1,5 +1,5 @@
 from controller.Errors import MalformedRequestData, ModelNotFound, ModelInTraining
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from controller.Responses import response
 from model.Trainer import ModelTrainer
 import time
@@ -35,13 +35,14 @@ def report_model_status(mid):
 def create_model():
     request_dict = request.json
     if 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
-        id = int(time.time())
+        mid = int(time.time())
         t = Thread(target=ModelTrainer, args=(uniquify(request_dict['data']), str(id)))
         t.start()
-        payload = {'id': id}
+        payload = {'id': mid}
         return response("Model Request Created Successfully", payload)
     else:
         raise MalformedRequestData()
+
 
 def uniquify(input_list):
     try:
