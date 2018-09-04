@@ -13,13 +13,13 @@ modelController = Blueprint("modelController", __name__)
 @modelController.route("/model/<int:mid>", methods=['GET'])
 def report_model_status(mid):
     try:
-        abspath = os.path.dirname(os.path.abspath(__file__))
-        with open(abspath+'/model_list.csv', 'r') as f:
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with open(parent_dir+'/model/model_list.csv', 'r') as f:
             model_list = [int(x) for x in f.readlines()]
             f.close()
         if mid in model_list:
             try:
-                with open(abspath+'/clusters/{}.json'.format(str(mid)), 'r') as f:
+                with open(parent_dir+'/../model/clusters/{}.json'.format(str(mid)), 'r') as f:
                     clusters = json.loads(f.read())
                     f.close()
                 payload = {'clusters': clusters,
