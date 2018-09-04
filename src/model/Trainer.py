@@ -134,7 +134,7 @@ class ModelTrainer:
         word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
         check_dir('model/clusters/')
-        with open(self.json_path, "w+") as f:
+        with open(self.json_path, "w") as f:
             f.write(json.dumps(result))
             f.close()
         print(self.json_path + " written")
