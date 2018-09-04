@@ -8,6 +8,7 @@ from nltk.tokenize import word_tokenize
 import numpy as np
 from sklearn.cluster import KMeans
 import json
+import os
 
 url = "https://www.google.com/search?q={}&start={}&hl=en"  # hl = languages, cr = country
 
@@ -112,10 +113,15 @@ def get_clusters(word_to_vec, k=5, max_iteration=300):
     return result
 
 
+def check_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 class ModelTrainer:
     def __init__(self, keywords, mid):
-        self.id = str(mid)
-        self.json_path = 'model/clusters/{}.json'.format(self.id)
+        self.mid = str(mid)
+        self.json_path = 'model/clusters/{}.json'.format(self.mid)
         self.keywords = keywords
         self.record_id()
         self.get_clusters()
@@ -124,9 +130,10 @@ class ModelTrainer:
         word_to_doc = get_word_to_doc_threaded(self.keywords, threads=50)
         while len(word_to_doc) != len(self.keywords):
             time.sleep(1)
-        model = train(word_to_doc, self.id, vec_size)
+        model = train(word_to_doc, self.mid, vec_size)
         word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
+        check_dir('model/clusters/')
         with open(self.json_path, "w+") as f:
             f.write(json.dumps(result))
             f.close()
@@ -134,5 +141,5 @@ class ModelTrainer:
 
     def record_id(self):
         with open('model/model_list.csv', 'a') as f:
-            f.writelines(self.id+'\n')
+            f.writelines(self.mid+'\n')
             f.close()
