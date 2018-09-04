@@ -1,3 +1,4 @@
 src/model/model_list.csv
 src/model/clusters/*.json
 __pycache__/
+.idea/
