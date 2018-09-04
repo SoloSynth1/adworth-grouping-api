@@ -1,8 +1,8 @@
 from flask import jsonify
 from werkzeug.exceptions import default_exceptions, HTTPException
 
-class JSONExceptionHandler(object):
 
+class JSONExceptionHandler(object):
     def __init__(self, app=None):
         if app:
             self.init_app(app)
@@ -12,7 +12,10 @@ class JSONExceptionHandler(object):
             response = jsonify(message=error.description)
         except:
             response = jsonify(message="Internal Server Error")
-        response.status_code = error.code if isinstance(error, HTTPException) else 500
+        if isinstance(error, HTTPException):
+            response.status_code = error.code
+        else:
+            response.status_code = 500
         return response
 
     def init_app(self, app):
