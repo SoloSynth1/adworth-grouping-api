@@ -4,3 +4,4 @@ src/model/clusters/*.json
 __pycache__/
 twistd.log
 twistd.pid
+nohup.out
