@@ -61,8 +61,8 @@ def get_word_to_doc_threaded(keywords, threads=20):
             except Exception as e:
                 # wait for google search to unblock
                 fetched = False
-                print("got blocked. lul\nwaiting 30 mins...")
-                time.sleep(1800)
+                print("got blocked. lul\nwaiting 60 mins...")
+                time.sleep(3600)
                 continue
         for thread in t:
             thread.join()
