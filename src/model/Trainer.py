@@ -82,6 +82,5 @@ class ModelTrainer:
         print(self.json_path + " written")
 
     def record_id(self):
-        with open(self.abspath+'/model_list.csv', 'a') as f:
-            f.writelines(self.mid+'\n')
+        with open(self.json_path, 'a') as f:
             f.close()

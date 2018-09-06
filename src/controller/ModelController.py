@@ -13,24 +13,17 @@ modelController = Blueprint("modelController", __name__)
 @modelController.route("/model/<int:mid>", methods=['GET'])
 def report_model_status(mid):
     try:
-        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        with open(parent_dir+'/model/model_list.csv', 'r') as f:
-            model_list = [int(x) for x in f.readlines()]
+        dir = os.path.dirname(os.path.abspath(__file__))
+        with open(dir+'/../model/clusters/{}.json'.format(str(mid)), 'r') as f:
+            clusters = json.loads(f.read())
             f.close()
-        if mid in model_list:
-            try:
-                with open(parent_dir+'/model/clusters/{}.json'.format(str(mid)), 'r') as f:
-                    clusters = json.loads(f.read())
-                    f.close()
-                payload = {'clusters': clusters,
-                           'id': mid}
-                return response("Retrieve Sucessful", payload=payload)
-            except FileNotFoundError:
-                raise ModelInTraining(mid)
-        else:
-            raise ModelNotFound(mid)
+        payload = {'clusters': clusters,
+                   'id': mid}
+        return response("Retrieve Sucessful", payload=payload)
     except FileNotFoundError:
         raise ModelNotFound(mid)
+    except Exception:
+        raise ModelInTraining(mid)
 
 
 @modelController.route("/model/create", methods=['POST'])
