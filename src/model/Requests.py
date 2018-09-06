@@ -5,17 +5,24 @@ import time
 import re
 from threading import Thread
 
-desktop_agents = [
-    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14',
-    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.71 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.98 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.98 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.71 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/62.0']
+# desktop_agents = [
+#     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
+#     'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
+#     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
+#     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14',
+#     'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.71 Safari/537.36',
+#     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.98 Safari/537.36',
+#     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.98 Safari/537.36',
+#     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.71 Safari/537.36',
+#     'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.99 Safari/537.36',
+#     'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/62.0']
+
+#
+# def random_headers():
+#     return {
+#             'User-Agent': choice(desktop_agents),
+#             # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+#             }
 
 url = "https://www.google.com/search?q={}&start={}&hl=en"  # hl = languages, cr = country
 
@@ -42,7 +49,7 @@ def preprocess(response):
         return None
 
 
-def get_word_to_doc_threaded(keywords, threads=20, wait_time=4000):
+def get_word_to_doc_threaded(keywords, threads=25, wait_time=4000):
     links = []
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
@@ -80,12 +87,10 @@ def get_word_to_doc_threaded(keywords, threads=20, wait_time=4000):
 
 def thread_worker(link, keyword, word_to_doc):
     if not keyword in word_to_doc.keys() or word_to_doc[keyword] is None:
-        response = requests.get(link)
+        session = requests.session()
+        session.proxies = {
+            'http' : 'sock5h://localhost:9050',
+            'https' : 'sock5h://localhost:9050'
+        }
+        response = session.get(link)
         word_to_doc[keyword] = preprocess(response)
-
-
-def random_headers():
-    return {
-            'User-Agent': choice(desktop_agents),
-            # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-            }

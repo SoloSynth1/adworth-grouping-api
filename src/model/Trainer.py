@@ -60,7 +60,7 @@ class ModelTrainer:
         dump_pred(self.mid, self.result)
 
     def fit_predict(self, keywords, vec_size=30):
-        word_to_doc = get_word_to_doc_threaded(keywords, threads=100)
+        word_to_doc = get_word_to_doc_threaded(keywords)
         # while len(word_to_doc) != len(self.keywords):
         #     time.sleep(1)
         model = train(word_to_doc, self.mid, vec_size)
