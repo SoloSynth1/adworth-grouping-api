@@ -4,8 +4,7 @@ from controller.Responses import response
 from model.Trainer import ModelTrainer
 import time
 from threading import Thread
-import json
-import os
+from model.Utils import load_json
 
 modelController = Blueprint("modelController", __name__)
 
@@ -13,10 +12,7 @@ modelController = Blueprint("modelController", __name__)
 @modelController.route("/model/<int:mid>", methods=['GET'])
 def report_model_status(mid):
     try:
-        dir = os.path.dirname(os.path.abspath(__file__))
-        with open(dir+'/../model/clusters/{}.json'.format(str(mid)), 'r') as f:
-            clusters = json.loads(f.read())
-            f.close()
+        clusters = load_json(mid)
         payload = {'clusters': clusters,
                    'id': mid}
         return response("Retrieve Sucessful", payload=payload)

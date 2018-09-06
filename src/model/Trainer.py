@@ -1,11 +1,9 @@
 from model.Requests import get_word_to_doc_threaded
-import time
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
 import numpy as np
 from sklearn.cluster import KMeans
-import json
-import os
+from model.Utils import create_json, dump_pred
 
 def train(word_to_doc, model_id, vec_size=30, max_epochs=100, alpha=0.025):
     tagged_data = [TaggedDocument(words=word_tokenize(value.lower()), tags=[key]) for key, value in word_to_doc.items()]
@@ -54,33 +52,18 @@ def get_clusters(word_to_vec, k=5, max_iteration=300):
     return result
 
 
-def check_dir(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-
 class ModelTrainer:
     def __init__(self, keywords, mid):
-        self.abspath = os.path.dirname(os.path.abspath(__file__))
         self.mid = str(mid)
-        self.json_path = self.abspath+ '/clusters/{}.json'.format(self.mid)
-        self.keywords = keywords
-        self.record_id()
-        self.get_clusters()
+        create_json(self.mid)
+        self.result = self.fit_predict(keywords)
+        dump_pred(self.mid, self.result)
 
-    def get_clusters(self, vec_size=30):
-        word_to_doc = get_word_to_doc_threaded(self.keywords, threads=100)
-        while len(word_to_doc) != len(self.keywords):
-            time.sleep(1)
+    def fit_predict(self, keywords, vec_size=30):
+        word_to_doc = get_word_to_doc_threaded(keywords, threads=100)
+        # while len(word_to_doc) != len(self.keywords):
+        #     time.sleep(1)
         model = train(word_to_doc, self.mid, vec_size)
         word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
-        check_dir(self.abspath+'/clusters/')
-        with open(self.json_path, "w") as f:
-            f.write(json.dumps(result))
-            f.close()
-        print(self.json_path + " written")
-
-    def record_id(self):
-        with open(self.json_path, 'a') as f:
-            f.close()
+        return result
