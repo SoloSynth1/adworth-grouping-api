@@ -89,8 +89,8 @@ def thread_worker(link, keyword, word_to_doc):
     if not keyword in word_to_doc.keys() or word_to_doc[keyword] is None:
         session = requests.session()
         session.proxies = {
-            'http' : 'sock5h://localhost:9050',
-            'https' : 'sock5h://localhost:9050'
+            'http' : 'socks5h://localhost:9050',
+            'https' : 'socks5h://localhost:9050'
         }
         response = session.get(link)
         word_to_doc[keyword] = preprocess(response)
