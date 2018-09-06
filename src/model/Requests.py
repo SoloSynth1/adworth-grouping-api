@@ -29,9 +29,8 @@ def geturls(keyword, pages):
 
 
 def preprocess(response):
-    soup = BeautifulSoup(response.content, 'lxml')
-    if (response.status_code == 200):
-        print(response.content)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content.decode('utf-8'), 'lxml')
         raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
         output = raw_doc
         output = re.compile('(\n|\t|\r|\xa0)').sub(' ', output)
@@ -42,7 +41,7 @@ def preprocess(response):
         return None
 
 
-def get_word_to_doc_threaded(keywords, threads=20, wait_time=10):
+def get_word_to_doc_threaded(keywords, threads=20, wait_time=1800):
     links = []
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
