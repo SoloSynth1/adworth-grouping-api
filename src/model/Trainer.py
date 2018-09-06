@@ -1,7 +1,4 @@
-import requests
-from bs4 import BeautifulSoup
-import re
-from threading import Thread
+from model.Requests import get_word_to_doc_threaded
 import time
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
@@ -9,72 +6,6 @@ import numpy as np
 from sklearn.cluster import KMeans
 import json
 import os
-
-url = "https://www.google.com/search?q={}&start={}&hl=en"  # hl = languages, cr = country
-
-
-def geturls(keyword, pages):
-    urls = []
-    result_per_page = 10
-    for x in range(0, pages):
-        urls.append(url.format(keyword.replace(" ", "%20"), str(x * result_per_page)))
-    return urls
-
-
-def preprocess(soup):
-    try:
-        raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
-        output = raw_doc
-        output = re.compile('(\n|\t|\r|\xa0)').sub(' ', output)
-        output = re.compile("\'").sub("'", output)
-        output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
-        return output
-    except:
-        return None
-
-
-def get_word_to_doc_threaded(keywords, threads=20):
-    links = []
-    for keyword in keywords:
-        links.extend(geturls(keyword, 1))
-
-    word_to_doc = {}
-    length = len(links)
-    i = 0
-    t = [None for _ in range(threads)]
-    while i < length:
-        fetched = False
-        while not fetched:
-            try:
-                work_count = min(i + threads, length)
-                print("{}/{}...".format(work_count, length))
-                for j in range(threads):
-                    if i + j < length:
-                        t[j] = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
-                        t[j].start()
-                while len(word_to_doc) != work_count:
-                    time.sleep(1)
-                for k, v in word_to_doc.items():
-                    if v == None:
-                        raise e
-                fetched = True
-            except Exception as e:
-                # wait for google search to unblock
-                fetched = False
-                print("got blocked. lul\nwaiting 60 mins...")
-                time.sleep(3600)
-                continue
-        for thread in t:
-            thread.join()
-        i += threads
-    return word_to_doc
-
-
-def thread_worker(link, keyword, word_to_doc):
-    if not keyword in word_to_doc.keys() or word_to_doc[keyword] != None:
-        soup = BeautifulSoup(requests.get(link).content, 'lxml')
-        word_to_doc[keyword] = preprocess(soup)
-
 
 def train(word_to_doc, model_id, vec_size=30, max_epochs=100, alpha=0.025):
     tagged_data = [TaggedDocument(words=word_tokenize(value.lower()), tags=[key]) for key, value in word_to_doc.items()]
