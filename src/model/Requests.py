@@ -38,6 +38,7 @@ def preprocess(response):
         output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
         return output
     else:
+        print("A thread reported status code != 200")
         return None
 
 
