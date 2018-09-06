@@ -42,7 +42,7 @@ def preprocess(response):
         return None
 
 
-def get_word_to_doc_threaded(keywords, threads=20, wait_time=1800):
+def get_word_to_doc_threaded(keywords, threads=20, wait_time=4000):
     links = []
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
