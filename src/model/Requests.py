@@ -64,11 +64,9 @@ def get_word_to_doc_threaded(keywords, threads=20, wait_time=10):
                 if sum([x.is_alive() for x in t]) == 0:
                     break
                 time.sleep(1)
-            print(len(word_to_doc))
-            print(word_to_doc.items())
             fetched = True
             for k, v in word_to_doc.items():
-                if v == None:
+                if v is None:
                     fetched = False
                     break
             if not fetched:
@@ -81,8 +79,8 @@ def get_word_to_doc_threaded(keywords, threads=20, wait_time=10):
 
 
 def thread_worker(link, keyword, word_to_doc):
-    if not keyword in word_to_doc.keys() or word_to_doc[keyword] != None:
-        response = requests.get(url, headers=random_headers())
+    if not keyword in word_to_doc.keys() or word_to_doc[keyword] is None:
+        response = requests.get(link)
         word_to_doc[keyword] = preprocess(response)
 
 
