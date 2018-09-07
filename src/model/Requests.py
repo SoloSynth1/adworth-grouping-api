@@ -55,7 +55,7 @@ def preprocess(response):
         return None
 
 
-def get_word_to_doc_threaded(keywords, threads=10, wait_time=30, blocked_wait_time=1800):
+def get_word_to_doc_threaded(keywords, mid, threads=10, wait_time=30, blocked_wait_time=1800):
     links = []
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
@@ -68,7 +68,7 @@ def get_word_to_doc_threaded(keywords, threads=10, wait_time=30, blocked_wait_ti
         fetched = False
         while not fetched:
             work_count = min(i + threads, length)
-            print("{}/{}...".format(work_count, length))
+            print("#{}: Fetching data {}/{}...".format(mid, work_count, length))
             for j in range(threads):
                 if i + j < length:
                     t[j] = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
@@ -84,7 +84,7 @@ def get_word_to_doc_threaded(keywords, threads=10, wait_time=30, blocked_wait_ti
                     fetched = False
                     break
             if not fetched:
-                print("got blocked. lul\nwaiting {} mins...".format(int(blocked_wait_time / 60)))
+                print("#{}: got blocked. lul\nwaiting {} mins...".format(mid, int(blocked_wait_time / 60)))
                 time.sleep(blocked_wait_time)
         # for thread in t:
         #     thread.join()
