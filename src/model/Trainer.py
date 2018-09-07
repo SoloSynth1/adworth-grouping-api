@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from model.Utils import create_json, dump_pred
 
-def train(word_to_doc, model_id, vec_size=30, max_epochs=100, alpha=0.025):
+def train(word_to_doc, vec_size=30, max_epochs=100, alpha=0.025):
     tagged_data = [TaggedDocument(words=word_tokenize(value.lower()), tags=[key]) for key, value in word_to_doc.items()]
 
     model = Doc2Vec(vector_size=vec_size,
@@ -17,17 +17,11 @@ def train(word_to_doc, model_id, vec_size=30, max_epochs=100, alpha=0.025):
     model.build_vocab(tagged_data)
 
     for epoch in range(max_epochs):
-        # print('Epoch {0}/{1}...'.format(epoch, max_epochs))
         model.train(tagged_data,
                     total_examples=model.corpus_count,
                     epochs=model.epochs)
-        # decrease the learning rate
         model.alpha -= 0.0002
-        # fix the learning rate, no decay
         model.min_alpha = model.alpha
-
-    # model.save("data/"+ model_id + "_d2v.model")
-    # print("Model Saved")
     return model
 
 
@@ -61,8 +55,6 @@ class ModelTrainer:
 
     def fit_predict(self, keywords, vec_size=30):
         word_to_doc = get_word_to_doc_threaded(keywords, self.mid)
-        # while len(word_to_doc) != len(self.keywords):
-        #     time.sleep(1)
         model = train(word_to_doc, self.mid, vec_size)
         word_to_vec = get_word_to_vec(model, word_to_doc)
         result = get_clusters(word_to_vec)
