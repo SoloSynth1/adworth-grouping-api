@@ -40,7 +40,10 @@ def geturls(keyword, pages):
 
 def preprocess(response):
     if response.status_code == 200:
-        soup = BeautifulSoup(response.content.decode('utf-8'), 'lxml')
+        try:
+            soup = BeautifulSoup(response.content.decode('utf-8'), 'lxml')
+        except UnicodeDecodeError:
+            soup = BeautifulSoup(response.content, 'lxml')
         raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
         output = raw_doc
         output = re.compile('(\n|\t|\r|\xa0)').sub(' ', output)
