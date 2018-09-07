@@ -46,10 +46,10 @@ def get_word_to_doc_threaded(keywords, mid, threads=10, wait_time=30, blocked_wa
         while not fetched:
             work_count = min(i + threads, length)
             print("#{}: Fetching data {}/{}...".format(mid, work_count, length))
-            for j in range(work_count):
+            for j in range(work_count-i):
                 t[j] = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
                 t[j].start()
-            if i+j != length-1:
+            if work_count != length:
                 time.sleep(wait_time)
             while True:
                 if sum([x.is_alive() for x in t]) == 0:
