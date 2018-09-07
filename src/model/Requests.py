@@ -18,6 +18,9 @@ from threading import Thread
 #     'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/62.0']
 
 #
+# desktop_agents = [
+#         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/68.0.3440.106 Chrome/68.0.3440.106 Safari/537.36"]
+
 # def random_headers():
 #     return {
 #             'User-Agent': choice(desktop_agents),
@@ -45,11 +48,11 @@ def preprocess(response):
         output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
         return output
     else:
-        print("A thread reported status code != 200")
+        print("A thread reported status code == " + str(response.status_code))
         return None
 
 
-def get_word_to_doc_threaded(keywords, threads=25, wait_time=4000):
+def get_word_to_doc_threaded(keywords, threads=10, wait_time=30, blocked_wait_time=1800):
     links = []
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
@@ -67,6 +70,7 @@ def get_word_to_doc_threaded(keywords, threads=25, wait_time=4000):
                 if i + j < length:
                     t[j] = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
                     t[j].start()
+            time.sleep(wait_time)
             while True:
                 if sum([x.is_alive() for x in t]) == 0:
                     break
@@ -77,8 +81,8 @@ def get_word_to_doc_threaded(keywords, threads=25, wait_time=4000):
                     fetched = False
                     break
             if not fetched:
-                print("got blocked. lul\nwaiting {} mins...".format(int(wait_time/60)))
-                time.sleep(wait_time)
+                print("got blocked. lul\nwaiting {} mins...".format(int(blocked_wait_time / 60)))
+                time.sleep(blocked_wait_time)
         # for thread in t:
         #     thread.join()
         i += threads
@@ -88,9 +92,11 @@ def get_word_to_doc_threaded(keywords, threads=25, wait_time=4000):
 def thread_worker(link, keyword, word_to_doc):
     if not keyword in word_to_doc.keys() or word_to_doc[keyword] is None:
         session = requests.session()
-        session.proxies = {
-            'http' : 'socks5h://localhost:9050',
-            'https' : 'socks5h://localhost:9050'
-        }
+        # session.proxies = {
+        #     'http' : 'socks5h://localhost:9050',
+        #     'https' : 'socks5h://localhost:9050'
+        # }
+        session.cookies.clear()
+        # response = session.get(link, headers=random_headers())
         response = session.get(link)
         word_to_doc[keyword] = preprocess(response)
