@@ -26,8 +26,7 @@ def report_model_status(mid):
 def create_model():
     request_dict = request.json
     if 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
-        mid = int(time.time())
-        t = Thread(target=ModelTrainer, args=(uniquify(request_dict['data']), str(mid)))
+        t = Thread(target=ModelTrainer, args=(uniquify(request_dict['data']), str(int(time.time()))))
         t.start()
         payload = {'id': mid}
         return response("Model Request Created Successfully", payload)

@@ -17,10 +17,10 @@ def create_json(mid):
         f.close()
     print(get_jsonpath(mid) + " created")
 
-def dump_pred(mid, result):
-    json_file = get_jsonpath(mid)
+def dump_pred(ModelTrainer):
+    json_file = get_jsonpath(ModelTrainer.mid)
     with open(json_file, "w") as f:
-        f.write(json.dumps(result))
+        f.write(json.dumps(ModelTrainer.result))
         f.close()
     print(json_file + " written")
 
