@@ -2,9 +2,10 @@ from controller.Errors import MalformedRequestData, ModelNotFound, ModelInTraini
 from flask import Blueprint, request
 from controller.Responses import response
 from model.Trainer import ModelTrainer
+from controller.Queue import Queue
 import time
-from threading import Thread
 from model.Utils import load_json
+import hashlib
 
 modelController = Blueprint("modelController", __name__)
 
@@ -26,9 +27,11 @@ def report_model_status(mid):
 def create_model():
     request_dict = request.json
     if 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
-        t = Thread(target=ModelTrainer, args=(uniquify(request_dict['data']), str(int(time.time()))))
-        t.start()
-        payload = {'id': mid}
+        q = Queue()
+        mid = hashlib.sha1(str(time.time()).encode('utf-8')).hexdigest()
+        q.insert(ModelTrainer(uniquify(request_dict['data']), mid))
+        payload = {'id': mid,
+                   'training_queue': str(q.list)}
         return response("Model Request Created Successfully", payload)
     else:
         raise MalformedRequestData()

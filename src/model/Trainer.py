@@ -47,9 +47,12 @@ class ModelTrainer:
         self.mid = str(mid)
         create_json(self.mid)
         self.keywords = keywords
-        self.reult = None
+        self.result = None
         # self.result = self.fit_predict()
         # dump_pred(self.mid, self.result)
+
+    def __repr__(self):
+        return "model.Trainer.ModelTrainer #" + self.mid
 
     def fit_predict(self):
         word_to_doc = get_word_to_doc_threaded(self.keywords, self.mid)
