@@ -44,7 +44,7 @@ def get_clusters(word_to_vec, k=5, max_iteration=300):
 
 class ModelTrainer:
     def __init__(self, keywords, mid):
-        self.mid = str(mid)
+        self.mid = mid
         create_json(self.mid)
         self.keywords = keywords
         self.result = None

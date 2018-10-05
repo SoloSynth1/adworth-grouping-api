@@ -10,7 +10,7 @@ import hashlib
 modelController = Blueprint("modelController", __name__)
 
 
-@modelController.route("/model/<int:mid>", methods=['GET'])
+@modelController.route("/model/<mid>", methods=['GET'])
 def report_model_status(mid):
     try:
         clusters = load_json(mid)
