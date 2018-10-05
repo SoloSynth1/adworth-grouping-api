@@ -2,6 +2,7 @@ src/model/model_list.csv
 src/model/clusters/*.json
 .idea/
 __pycache__/
+venv/
 twistd.log
 twistd.pid
 nohup.out
