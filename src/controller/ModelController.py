@@ -26,7 +26,7 @@ def report_model_status(mid):
 @modelController.route("/model/create", methods=['POST'])
 def create_model():
     request_dict = request.json
-    if 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
+    if request_dict is not None and 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
         unique_words = uniquify(request_dict['data'])
         if len(unique_words) >= 5:
             q = Queue()
