@@ -11,7 +11,7 @@ class JSONExceptionHandler(object):
         try:
             response = jsonify(message=error.description)
         except:
-            response = jsonify(message="Internal Server Error")
+            response = jsonify(message=str(error))
         if isinstance(error, HTTPException):
             response.status_code = error.code
         else:

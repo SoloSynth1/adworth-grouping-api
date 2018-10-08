@@ -1,4 +1,4 @@
-from controller.Errors import MalformedRequestData, ModelNotFound, ModelInTraining
+from controller.Errors import MalformedRequestData, ModelNotFound, ModelInTraining, TooFewKeywords
 from flask import Blueprint, request
 from controller.Responses import response
 from model.Trainer import ModelTrainer
@@ -27,12 +27,16 @@ def report_model_status(mid):
 def create_model():
     request_dict = request.json
     if 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
-        q = Queue()
-        mid = hashlib.sha1(str(time.time()).encode('utf-8')).hexdigest()
-        q.insert(ModelTrainer(uniquify(request_dict['data']), mid))
-        payload = {'id': mid,
-                   'training_queue': str(q.list)}
-        return response("Model Request Created Successfully", payload)
+        unique_words = uniquify(request_dict['data'])
+        if len(unique_words) >= 5:
+            q = Queue()
+            mid = hashlib.sha1(str(time.time()).encode('utf-8')).hexdigest()
+            q.insert(ModelTrainer(unique_words, mid))
+            payload = {'id': mid,
+                       'training_queue': str(q.list)}
+            return response("Model Request Created Successfully", payload)
+        else:
+            raise TooFewKeywords()
     else:
         raise MalformedRequestData()
 

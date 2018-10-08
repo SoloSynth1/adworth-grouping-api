@@ -14,3 +14,8 @@ class MalformedRequestData(BadRequest):
     def __init__(self):
         super(MalformedRequestData, self).__init__()
         self.description = "Malformed Request. Please make sure parameter 'data' is a list of keywords in the JSON request."
+
+class TooFewKeywords(BadRequest):
+    def __init__(self):
+        super(TooFewKeywords, self).__init__()
+        self.description = "Too few keywords given. Please make sure there are at least 5 unique strings in the 'data' list."
