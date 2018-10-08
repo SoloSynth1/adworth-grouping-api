@@ -6,6 +6,7 @@ from controller.Queue import Queue
 import time
 from model.Utils import load_json
 import hashlib
+import sys
 
 modelController = Blueprint("modelController", __name__)
 
@@ -26,6 +27,7 @@ def report_model_status(mid):
 @modelController.route("/model/create", methods=['POST'])
 def create_model():
     request_dict = request.json
+    print('ModelController received request: {}'.format(request.json), file=sys.stdout)
     if request_dict is not None and 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
         unique_words = uniquify(request_dict['data'])
         if len(unique_words) >= 5:
@@ -33,7 +35,7 @@ def create_model():
             mid = hashlib.sha1(str(time.time()).encode('utf-8')).hexdigest()
             q.insert(ModelTrainer(unique_words, mid))
             payload = {'id': mid,
-                       'training_queue': str(q.list)}
+                       'training_queue': q.get_current_queue()}
             return response("Model Request Created Successfully", payload)
         else:
             raise TooFewKeywords()
@@ -43,6 +45,6 @@ def create_model():
 
 def uniquify(input_list):
     try:
-        return list(set([str(x) for x in input_list]))
+        return list(set([str(x) for x in input_list if str(x) != '' and not x is None]))
     except:
         raise MalformedRequestData()

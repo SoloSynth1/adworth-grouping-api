@@ -35,3 +35,6 @@ class Queue(metaclass=Singleton):
                 dump_pred(self.list[0])
                 self.pop()
             time.sleep(5)
+
+    def get_current_queue(self):
+        return [str(mt) for mt in self.list]

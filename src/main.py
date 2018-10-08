@@ -17,8 +17,7 @@ app.register_blueprint(modelController)
 
 @app.route("/status")
 def status():
-    q = Queue()
-    payload = {'training_queue' : str(q.list)}
+    payload = {'training_queue' : Queue().get_current_queue()}
     return response("Status OK, ready to receive data.", payload)
 
 def run_twisted_wsgi(port=8000):
