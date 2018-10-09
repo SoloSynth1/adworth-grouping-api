@@ -45,6 +45,6 @@ def create_model():
 
 def uniquify(input_list):
     try:
-        return list(set([str(x) for x in input_list if str(x) != '' and not x is None]))
+        return list(set([str(x).strip() for x in input_list if str(x) != '' and not x is None]))
     except:
         raise MalformedRequestData()
