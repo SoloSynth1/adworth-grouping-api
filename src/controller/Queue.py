@@ -1,4 +1,4 @@
-from model.Utils import dump_pred
+from model.Utils import dump_pred, stdout_log
 from model.Trainer import ModelTrainer
 import time
 
@@ -22,7 +22,7 @@ class Queue(metaclass=Singleton):
         if isinstance(mt, ModelTrainer):
             self.list.append(mt)
         else:
-            print("invalid varible insertion to Queue, breaking...")
+            stdout_log("invalid varible insertion to Queue, breaking...")
 
 
     def pop(self):

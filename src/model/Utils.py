@@ -1,5 +1,7 @@
 import os
 import json
+import datetime
+import sys
 
 def get_abspath():
     return os.path.dirname(os.path.abspath(__file__)) + '/clusters/'
@@ -15,14 +17,14 @@ def create_json(mid):
     check_dir(get_abspath())
     with open(get_jsonpath(mid), 'a') as f:
         f.close()
-    print(get_jsonpath(mid) + " created")
+    stdout_log(get_jsonpath(mid) + " created")
 
 def dump_pred(ModelTrainer):
     json_file = get_jsonpath(ModelTrainer.mid)
     with open(json_file, "w") as f:
         f.write(json.dumps(ModelTrainer.result))
         f.close()
-    print(json_file + " written")
+    stdout_log(json_file + " written")
 
 def load_json(mid):
     try:
@@ -32,3 +34,6 @@ def load_json(mid):
         return clusters
     except Exception as e:
         raise e
+
+def stdout_log(message):
+    print("[{}] {}".format(datetime.datetime.now(),message), file=sys.stdout)

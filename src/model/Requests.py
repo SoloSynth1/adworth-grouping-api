@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import re
 from threading import Thread
+from model.Utils import stdout_log
 
 url = "https://www.google.com/search?q={}&start={}&hl=en"  # hl = languages, cr = country
 
@@ -28,11 +29,11 @@ def preprocess(response):
         output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
         return output
     else:
-        print("A thread reported status code == " + str(response.status_code))
+        stdout_log("A thread reported status code == " + str(response.status_code))
         return None
 
 
-def get_word_to_doc_threaded(keywords, mid, threads=10, wait_time=20, blocked_wait_time=7200):
+def get_word_to_doc_threaded(keywords, mid, threads=25, wait_time=20, jail_time=7200):
     links = []
     for keyword in keywords:
         links.extend(geturls(keyword, 1))
@@ -45,7 +46,7 @@ def get_word_to_doc_threaded(keywords, mid, threads=10, wait_time=20, blocked_wa
         fetched = False
         while not fetched:
             work_count = min(i + threads, length)
-            print("#{}: Fetching data {}/{}...".format(mid, work_count, length))
+            stdout_log("#{}: Fetching data {}/{}...".format(mid, work_count, length))
             for j in range(work_count-i):
                 t[j] = Thread(target=thread_worker, args=(links[i + j], keywords[i + j], word_to_doc))
                 t[j].start()
@@ -61,8 +62,8 @@ def get_word_to_doc_threaded(keywords, mid, threads=10, wait_time=20, blocked_wa
                     fetched = False
                     break
             if not fetched:
-                print("#{}: got blocked. lul\nwaiting {} mins...".format(mid, int(blocked_wait_time / 60)))
-                time.sleep(blocked_wait_time)
+                stdout_log("#{}: got blocked. lul\nwaiting {} mins...".format(mid, int(jail_time / 60)))
+                time.sleep(jail_time)
         i += threads
     return word_to_doc
 

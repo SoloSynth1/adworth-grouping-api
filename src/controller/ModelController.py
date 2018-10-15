@@ -4,9 +4,8 @@ from controller.Responses import response
 from model.Trainer import ModelTrainer
 from controller.Queue import Queue
 import time
-from model.Utils import load_json
+from model.Utils import load_json, stdout_log
 import hashlib
-import sys
 
 modelController = Blueprint("modelController", __name__)
 
@@ -26,11 +25,12 @@ def report_model_status(mid):
 
 @modelController.route("/model/create", methods=['POST'])
 def create_model():
+    maxClusters = 30
     request_dict = request.json
-    print('ModelController received request: {}'.format(request.json), file=sys.stdout)
+    stdout_log('ModelController received request: {}'.format(request.json))
     if request_dict is not None and 'data' in request_dict.keys() and isinstance(request_dict['data'], list):
         unique_words = uniquify(request_dict['data'])
-        if len(unique_words) >= 5:
+        if len(unique_words) >= maxClusters:
             q = Queue()
             mid = hashlib.sha1(str(time.time()).encode('utf-8')).hexdigest()
             q.insert(ModelTrainer(unique_words, mid))
@@ -38,7 +38,8 @@ def create_model():
                        'training_queue': q.get_current_queue()}
             return response("Model Request Created Successfully", payload)
         else:
-            raise TooFewKeywords()
+            stdout_log("Too few keywords, rejecting...")
+            raise TooFewKeywords(maxClusters)
     else:
         raise MalformedRequestData()
 

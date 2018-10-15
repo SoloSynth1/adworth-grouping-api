@@ -3,7 +3,7 @@ from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
 import numpy as np
 from sklearn.cluster import KMeans
-from model.Utils import create_json, dump_pred
+from model.Utils import create_json, stdout_log
 
 
 def train(word_to_doc, vec_size=32, max_epochs=150, alpha=0.025):
@@ -28,10 +28,11 @@ def get_word_to_vec(model, word_to_doc):
     return word_to_vec
 
 
-def get_clusters(word_to_vec, k=5, max_iteration=300):
+def get_clusters(word_to_vec, k_range_min=20, k_range_max=30, max_iteration=300):
     X = np.zeros(shape=(len(word_to_vec), len(list(word_to_vec.items())[0][1])))
     for i, _ in enumerate(word_to_vec.values()):
         X[i, :] = _
+    k = optimalK(X, nrefs=3, minClusters=k_range_min, maxClusters=k_range_max)
     estimator = KMeans(n_clusters=k, max_iter=max_iteration)
     y_pred = estimator.fit_predict(X)
     result = {}
@@ -41,6 +42,46 @@ def get_clusters(word_to_vec, k=5, max_iteration=300):
         result[str(y_pred[i])].append(_)
     return result
 
+
+def optimalK(data, nrefs=3, minClusters=1, maxClusters=15):
+    stdout_log("Finding optimal k-count...")
+    gaps = np.zeros((len(range(1, maxClusters)),))
+    # resultsdf = pd.DataFrame({'clusterCount': [], 'gap': []})
+    for gap_index, k in enumerate(range(minClusters, maxClusters)):
+
+        # Holder for reference dispersion results
+        refDisps = np.zeros(nrefs)
+
+        # For n references, generate random sample and perform kmeans getting resulting dispersion of each loop
+        for i in range(nrefs):
+            # Create new random reference set
+            randomReference = np.random.random_sample(size=data.shape)
+
+            # Fit to it
+            km = KMeans(k)
+            km.fit(randomReference)
+
+            refDisp = km.inertia_
+            refDisps[i] = refDisp
+
+        # Fit cluster to original data and create dispersion
+        km = KMeans(k)
+        km.fit(data)
+
+        origDisp = km.inertia_
+
+        # Calculate gap statistic
+        gap = np.log(np.mean(refDisps)) - np.log(origDisp)
+
+        # Assign this loop's gap statistic to gaps
+        gaps[gap_index] = gap
+
+        # resultsdf = resultsdf.append({'clusterCount': k, 'gap': gap}, ignore_index=True)
+
+    # return (gaps.argmax() + 1, resultsdf)  # Plus 1 because index of 0 means 1 cluster is optimal, index 2 = 3 clusters are optimal
+    k = gaps.argmax() + minClusters
+    stdout_log("Optimal K is {}".format(k))
+    return k
 
 class ModelTrainer:
     def __init__(self, keywords, mid):
@@ -56,7 +97,7 @@ class ModelTrainer:
 
     def fit_predict(self):
         word_to_doc = get_word_to_doc_threaded(self.keywords, self.mid)
-        print("#{}: Training doc2vec model...".format(self.mid))
+        stdout_log("#{}: Training doc2vec model...".format(self.mid))
         model = train(word_to_doc)
         word_to_vec = get_word_to_vec(model, word_to_doc)
         self.result = get_clusters(word_to_vec)
