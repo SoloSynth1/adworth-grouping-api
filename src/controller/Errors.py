@@ -16,6 +16,6 @@ class MalformedRequestData(BadRequest):
         self.description = "Malformed Request. Please make sure parameter 'data' is a list of keywords in the JSON request."
 
 class TooFewKeywords(BadRequest):
-    def __init__(self):
+    def __init__(self, maxClusters):
         super(TooFewKeywords, self).__init__()
-        self.description = "Too few keywords given. Please make sure there are at least 5 unique strings in the 'data' list."
+        self.description = "Too few keywords given. Please make sure there are at least {} unique strings in the 'data' list.".format(maxClusters)
