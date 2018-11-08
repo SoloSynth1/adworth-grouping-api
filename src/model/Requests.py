@@ -24,7 +24,7 @@ def preprocess(response):
             soup = BeautifulSoup(response.content, 'lxml')
         raw_doc = ' '.join(soup.find(id='desktop-search').find_all('tr')[0].strings)
         output = raw_doc
-        output = re.compile('(\n|\t|\r|\xa0)').sub(' ', output)
+        output = re.compile('(\n|\t|\r|\xa0|\x08|\x03)').sub(' ', output)
         output = re.compile("\'").sub("'", output)
         output = re.compile(r"(.)([\u4e00-\u9fa5])").sub(r"\1 \2 ", output)  # add whitespace between chinese characters
         return output

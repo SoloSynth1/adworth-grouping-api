@@ -15,16 +15,20 @@ def check_dir(directory):
 
 def create_json(mid):
     check_dir(get_abspath())
-    with open(get_jsonpath(mid), 'a') as f:
+    with open(get_jsonpath(mid), 'w') as f:
         f.close()
     stdout_log(get_jsonpath(mid) + " created")
 
-def dump_pred(ModelTrainer):
-    json_file = get_jsonpath(ModelTrainer.mid)
-    with open(json_file, "w") as f:
-        f.write(json.dumps(ModelTrainer.result))
-        f.close()
-    stdout_log(json_file + " written")
+def dump_result(ModelTrainer):
+    if ModelTrainer.model_only:
+        filename = get_abspath() + '{}.d2vmodel'.format(ModelTrainer.mid)
+        ModelTrainer.result.save(filename)
+    elif not ModelTrainer.model_only:
+        filename = get_jsonpath(ModelTrainer.mid)
+        with open(filename, "w") as f:
+            f.write(json.dumps(ModelTrainer.result))
+            f.close()
+    stdout_log(filename + " written")
 
 def load_json(mid):
     try:

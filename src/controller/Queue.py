@@ -1,4 +1,4 @@
-from model.Utils import dump_pred, stdout_log
+from model.Utils import dump_result, stdout_log
 from model.Trainer import ModelTrainer
 import time
 
@@ -31,8 +31,8 @@ class Queue(metaclass=Singleton):
     def monitor(self):
         while True:
             if len(self.list) > 0 and self.list[0].result is None:
-                self.list[0].fit_predict()
-                dump_pred(self.list[0])
+                self.list[0].execute()
+                dump_result(self.list[0])
                 self.pop()
             time.sleep(5)
 
