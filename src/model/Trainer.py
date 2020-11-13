@@ -84,20 +84,25 @@ def optimalK(data, nrefs=3, minClusters=1, maxClusters=15):
     return k
 
 class ModelTrainer:
-    def __init__(self, keywords, mid):
+    def __init__(self, keywords, mid, model_only=False):
         self.mid = mid
-        create_json(self.mid)
         self.keywords = keywords
+        if not model_only:
+            create_json(self.mid)
+        self.model_only = model_only
         self.result = None
-        # self.result = self.fit_predict()
-        # dump_pred(self.mid, self.result)
 
     def __repr__(self):
         return "model.Trainer.ModelTrainer #" + self.mid
 
-    def fit_predict(self):
+    def execute(self):
         word_to_doc = get_word_to_doc_threaded(self.keywords, self.mid)
         stdout_log("#{}: Training doc2vec model...".format(self.mid))
-        model = train(word_to_doc)
-        word_to_vec = get_word_to_vec(model, word_to_doc)
-        self.result = get_clusters(word_to_vec)
+        if self.model_only:
+            model = train(word_to_doc, vec_size=50, max_epochs=50)
+            self.result = model
+        else:
+            model = train(word_to_doc)
+            stdout_log("#{}: Creating clusters...".format(self.mid))
+            word_to_vec = get_word_to_vec(model, word_to_doc)
+            self.result = get_clusters(word_to_vec)
